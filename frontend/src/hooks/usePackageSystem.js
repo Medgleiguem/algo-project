@@ -92,6 +92,10 @@ export const usePackageSystem = () => {
           setSortMetrics(null);
           showNotification('System reset successfully');
           break;
+        default:
+          // Add default case to handle unknown actions
+          showNotification('Unknown action', 'error');
+          break;
       }
       
       await loadData();

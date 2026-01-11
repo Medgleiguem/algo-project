@@ -25,7 +25,7 @@ const App = () => {
     performanceData,
     sortMetrics,
     notification,
-    loading,
+    // Remove unused 'loading' variable
     setNotification,
     handleAction
   } = usePackageSystem();
