@@ -30,14 +30,37 @@ def add_package():
     global next_id
     try:
         data = request.json
+        custom_id = data.get('id')
+        
+        if custom_id is not None:
+            # Check for uniqueness
+            custom_id = int(custom_id)
+            
+            # Check queue
+            for p in package_queue.items:
+                if p.id == custom_id:
+                    return jsonify({'success': False, 'error': f'Package with ID {custom_id} already exists in queue'}), 400
+            
+            # Check stack
+            for p in truck_stack.items:
+                if p.id == custom_id:
+                    return jsonify({'success': False, 'error': f'Package with ID {custom_id} already exists in stack'}), 400
+            
+            package_id = custom_id
+            if package_id >= next_id:
+                next_id = package_id + 1
+        else:
+            package_id = next_id
+            next_id += 1
+            
         package = Package(
-            id=next_id,
+            id=package_id,
             priority=data.get('priority'),
             weight=data.get('weight'),
             destination=data.get('destination'),
             arrival_order=package_queue.size() + 1
         )
-        next_id += 1
+        
         package_queue.enqueue(package)
         return jsonify({
             'success': True,
@@ -127,10 +150,11 @@ def sort_queue():
     """Sort queue by priority"""
     try:
         algorithm = request.json.get('algorithm', 'quick')
+        key = request.json.get('key', 'priority')
         
         packages = package_queue.get_all()
         sorter = SortingAlgorithms()
-        result = sorter.sort(packages, 'priority', algorithm, ascending=False)
+        result = sorter.sort(packages, key, algorithm, ascending=False)
         
         package_queue.clear()
         for pkg in result['sorted']:
@@ -146,15 +170,29 @@ def sort_queue():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
+@app.route('/api/queue/clear', methods=['POST'])
+def clear_queue():
+    """Clear all packages from the queue"""
+    try:
+        package_queue.clear()
+        return jsonify({
+            'success': True,
+            'message': 'Queue cleared successfully',
+            'queue': package_queue.to_list()
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
 @app.route('/api/stack/sort', methods=['POST'])
 def sort_stack():
     """Sort stack by weight"""
     try:
         algorithm = request.json.get('algorithm', 'quick')
+        key = request.json.get('key', 'weight')
         
         packages = truck_stack.get_all()
         sorter = SortingAlgorithms()
-        result = sorter.sort(packages, 'weight', algorithm, ascending=True)
+        result = sorter.sort(packages, key, algorithm, ascending=True)
         
         truck_stack.clear()
         for pkg in result['sorted']:

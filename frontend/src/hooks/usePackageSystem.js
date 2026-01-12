@@ -60,6 +60,10 @@ export const usePackageSystem = () => {
           result = await ApiService.addRandomPackages(50);
           showNotification('50 packages added to queue');
           break;
+        case 'addManual':
+          result = await ApiService.addPackage(param);
+          showNotification(`Package #${result.package?.id} added manually`);
+          break;
         case 'process':
           result = await ApiService.processPackage();
           showNotification(`Package #${result.package?.id} loaded onto truck`);
@@ -68,15 +72,21 @@ export const usePackageSystem = () => {
           result = await ApiService.unloadPackage();
           showNotification(`Package #${result.package?.id} unloaded from truck`);
           break;
+        case 'clearQueue':
+          await ApiService.clearQueue();
+          showNotification('Queue cleared successfully');
+          break;
         case 'sortQueue':
-          result = await ApiService.sortQueue(param);
+          // param is expected to be { algorithm, key }
+          result = await ApiService.sortQueue(param.algorithm, param.key);
           setSortMetrics(result.metrics);
-          showNotification(`Queue sorted using ${result.metrics?.algorithm}`);
+          showNotification(`Queue sorted by ${param.key} using ${result.metrics?.algorithm}`);
           break;
         case 'sortStack':
-          result = await ApiService.sortStack(param);
+          // param is expected to be { algorithm, key }
+          result = await ApiService.sortStack(param.algorithm, param.key);
           setSortMetrics(result.metrics);
-          showNotification(`Stack sorted using ${result.metrics?.algorithm}`);
+          showNotification(`Stack sorted by ${param.key} using ${result.metrics?.algorithm}`);
           break;
         case 'compare':
           result = await ApiService.compareAlgorithms();

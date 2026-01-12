@@ -11,6 +11,19 @@ export const ApiService = {
     return response.json();
   },
 
+  async addPackage(packageData) {
+    const response = await fetch(`${API_BASE_URL}/packages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(packageData)
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to add package');
+    }
+    return response.json();
+  },
+
   async getQueue() {
     const response = await fetch(`${API_BASE_URL}/queue`);
     if (!response.ok) throw new Error('Failed to fetch queue');
@@ -39,21 +52,29 @@ export const ApiService = {
     return response.json();
   },
 
-  async sortQueue(algorithm) {
+  async clearQueue() {
+    const response = await fetch(`${API_BASE_URL}/queue/clear`, {
+      method: 'POST'
+    });
+    if (!response.ok) throw new Error('Failed to clear queue');
+    return response.json();
+  },
+
+  async sortQueue(algorithm, key) {
     const response = await fetch(`${API_BASE_URL}/queue/sort`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ algorithm })
+      body: JSON.stringify({ algorithm, key })
     });
     if (!response.ok) throw new Error('Failed to sort queue');
     return response.json();
   },
 
-  async sortStack(algorithm) {
+  async sortStack(algorithm, key) {
     const response = await fetch(`${API_BASE_URL}/stack/sort`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ algorithm })
+      body: JSON.stringify({ algorithm, key })
     });
     if (!response.ok) throw new Error('Failed to sort stack');
     return response.json();
